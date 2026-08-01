@@ -1,12 +1,21 @@
 # Le Dormeur
 
-Small Windows utility (C# / .NET WinForms) that:
-
-1. Gradually reduces **brightness** by a percentage you choose
-2. Over a configurable **duration** (e.g. 1 h)
-3. Then **forces the PC to sleep** when the timer ends
+Small Windows utility (C# / .NET WinForms) that gradually dims the screen, then puts the PC to sleep.
 
 > **Why “Le Dormeur”?** In French, *le dormeur* means **“the sleeper”** — the one who’s dozing off. Perfect for an app that gently dims the lights and tucks your PC into bed.
+
+![Le Dormeur — main window](screenshots/primary.png)
+
+## Features
+
+- **Brightness fade timer** — gradually reduce brightness by a percentage you choose, over a configurable duration (hours / minutes), then **force the PC to sleep**
+- **Pre-sleep warning** — top-most dialog ~2 minutes before sleep with live countdown, **Postpone (+15 min)**, or **Cancel**
+- **Automatic mode** — daily check at a time you set (“Are you still there?”); no answer before timeout → PC sleeps
+- **System tray** — minimize / close to tray, remaining-time tooltip, context menu (Open, Cancel timer, Exit)
+- **Multi-language UI** — Français, English, Español, Deutsch, Italiano, Português, Nederlands, Русский, 中文 (auto-detects Windows language on first launch)
+- **Brightness control** — **WMI** for real system brightness (laptops), **software gamma** fallback for external displays / desktops
+- **Persistent settings** — duration, %, language saved under `%AppData%\LeDormeur\`
+- **Ready-to-run builds** — single-file `LeDormeur.exe` via GitHub Releases (no .NET SDK required)
 
 ## Download
 
