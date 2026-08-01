@@ -186,6 +186,21 @@ public partial class Form1 : Form
         UpdateTrayUi();
     }
 
+    /// <summary>
+    /// Called when a second process launch is blocked: restore the UI from the tray if needed.
+    /// </summary>
+    public void BringToFrontFromAnotherInstance()
+    {
+        if (IsDisposed)
+            return;
+
+        RestoreFromTray();
+        TopMost = true;
+        TopMost = false;
+        BringToFront();
+        Activate();
+    }
+
     private void ExitFromTray()
     {
         if (_running)

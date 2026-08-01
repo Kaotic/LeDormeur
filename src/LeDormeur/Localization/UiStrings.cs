@@ -90,6 +90,9 @@ public sealed class UiStrings
     public required string StillThereBalloonTitle { get; init; }
     public required string StillThereBalloonText { get; init; }
 
+    public required string AlreadyRunningTitle { get; init; }
+    public required string AlreadyRunningMessage { get; init; }
+
     public static UiStrings For(AppLanguage language) => language switch
     {
         AppLanguage.English => English,
@@ -174,7 +177,9 @@ public sealed class UiStrings
         StillThereCountdown = "Veille dans {0:D2}:{1:D2}",
         StillThereYes = "Oui, je suis là",
         StillThereBalloonTitle = "Le Dormeur",
-        StillThereBalloonText = "Êtes-vous toujours là ? Répondez pour éviter la veille."
+        StillThereBalloonText = "Êtes-vous toujours là ? Répondez pour éviter la veille.",
+        AlreadyRunningTitle = "Le Dormeur",
+        AlreadyRunningMessage = "Le Dormeur est déjà en cours d’exécution."
     };
 
     public static readonly UiStrings English = new()
@@ -248,7 +253,9 @@ public sealed class UiStrings
         StillThereCountdown = "Sleep in {0:D2}:{1:D2}",
         StillThereYes = "Yes, I'm here",
         StillThereBalloonTitle = "Le Dormeur",
-        StillThereBalloonText = "Are you still there? Answer to prevent sleep."
+        StillThereBalloonText = "Are you still there? Answer to prevent sleep.",
+        AlreadyRunningTitle = "Le Dormeur",
+        AlreadyRunningMessage = "Le Dormeur is already running."
     };
 
     public static readonly UiStrings Spanish = new()
@@ -322,7 +329,9 @@ public sealed class UiStrings
         StillThereCountdown = "Suspensión en {0:D2}:{1:D2}",
         StillThereYes = "Sí, estoy aquí",
         StillThereBalloonTitle = "Le Dormeur",
-        StillThereBalloonText = "¿Sigues ahí? Responde para evitar la suspensión."
+        StillThereBalloonText = "¿Sigues ahí? Responde para evitar la suspensión.",
+        AlreadyRunningTitle = "Le Dormeur",
+        AlreadyRunningMessage = "Le Dormeur ya se está ejecutando."
     };
 
     public static readonly UiStrings German = new()
@@ -396,7 +405,9 @@ public sealed class UiStrings
         StillThereCountdown = "Energiesparmodus in {0:D2}:{1:D2}",
         StillThereYes = "Ja, ich bin da",
         StillThereBalloonTitle = "Le Dormeur",
-        StillThereBalloonText = "Bist du noch da? Antworte, um den Energiesparmodus zu verhindern."
+        StillThereBalloonText = "Bist du noch da? Antworte, um den Energiesparmodus zu verhindern.",
+        AlreadyRunningTitle = "Le Dormeur",
+        AlreadyRunningMessage = "Le Dormeur läuft bereits."
     };
 
     public static readonly UiStrings Italian = new()
@@ -470,7 +481,9 @@ public sealed class UiStrings
         StillThereCountdown = "Sospensione tra {0:D2}:{1:D2}",
         StillThereYes = "Sì, sono qui",
         StillThereBalloonTitle = "Le Dormeur",
-        StillThereBalloonText = "Sei ancora lì? Rispondi per evitare la sospensione."
+        StillThereBalloonText = "Sei ancora lì? Rispondi per evitare la sospensione.",
+        AlreadyRunningTitle = "Le Dormeur",
+        AlreadyRunningMessage = "Le Dormeur è già in esecuzione."
     };
 
     public static readonly UiStrings Portuguese = new()
@@ -544,7 +557,9 @@ public sealed class UiStrings
         StillThereCountdown = "Suspensão em {0:D2}:{1:D2}",
         StillThereYes = "Sim, estou aqui",
         StillThereBalloonTitle = "Le Dormeur",
-        StillThereBalloonText = "Ainda está aí? Responda para evitar a suspensão."
+        StillThereBalloonText = "Ainda está aí? Responda para evitar a suspensão.",
+        AlreadyRunningTitle = "Le Dormeur",
+        AlreadyRunningMessage = "O Le Dormeur já está em execução."
     };
 
     public static readonly UiStrings Dutch = new()
@@ -618,7 +633,9 @@ public sealed class UiStrings
         StillThereCountdown = "Slaapstand over {0:D2}:{1:D2}",
         StillThereYes = "Ja, ik ben er",
         StillThereBalloonTitle = "Le Dormeur",
-        StillThereBalloonText = "Ben je er nog? Antwoord om slaapstand te voorkomen."
+        StillThereBalloonText = "Ben je er nog? Antwoord om slaapstand te voorkomen.",
+        AlreadyRunningTitle = "Le Dormeur",
+        AlreadyRunningMessage = "Le Dormeur is al gestart."
     };
 
     public static readonly UiStrings Russian = new()
@@ -692,7 +709,9 @@ public sealed class UiStrings
         StillThereCountdown = "Сон через {0:D2}:{1:D2}",
         StillThereYes = "Да, я здесь",
         StillThereBalloonTitle = "Le Dormeur",
-        StillThereBalloonText = "Вы ещё здесь? Ответьте, чтобы избежать сна."
+        StillThereBalloonText = "Вы ещё здесь? Ответьте, чтобы избежать сна.",
+        AlreadyRunningTitle = "Le Dormeur",
+        AlreadyRunningMessage = "Le Dormeur уже запущен."
     };
 
     public static readonly UiStrings Chinese = new()
@@ -766,6 +785,8 @@ public sealed class UiStrings
         StillThereCountdown = "{0:D2}:{1:D2} 后进入睡眠",
         StillThereYes = "是的，我在",
         StillThereBalloonTitle = "Le Dormeur",
-        StillThereBalloonText = "您还在吗？请回复以避免睡眠。"
+        StillThereBalloonText = "您还在吗？请回复以避免睡眠。",
+        AlreadyRunningTitle = "Le Dormeur",
+        AlreadyRunningMessage = "Le Dormeur 已在运行。"
     };
 }
