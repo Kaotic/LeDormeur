@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "LeDormeur": {
+      "commandName": "Project"
+    },
+    "LeDormeur (dry-run)": {
+      "commandName": "Project",
+      "commandLineArgs": "--dry-run",
+      "environmentVariables": {
+        "LEDORMEUR_DRY_RUN": "1"
+      }
+    }
+  }
+}
