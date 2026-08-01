@@ -33,6 +33,11 @@ public partial class Form1 : Form
     private DateOnly? _autoModeFiredDate;
     private bool _autoModePromptActive;
 
+    /// <summary>
+    /// Brightness backend failed for this session; timer/sleep still run without dimming.
+    /// </summary>
+    private bool _brightnessControlUnavailable;
+
     /// <summary>Show the pre-sleep warning this long before the end.</summary>
     private static readonly TimeSpan WarningLeadTime = TimeSpan.FromMinutes(2);
 
@@ -378,7 +383,15 @@ public partial class Form1 : Form
             return;
         }
 
-        lblMode.Text = _brightness.UsesWmi ? _t.ModeWmi : _t.ModeGamma;
+        if (_brightness.UsesWmi)
+        {
+            lblMode.Text = _t.ModeWmi;
+            return;
+        }
+
+        lblMode.Text = _brightness.GammaSupported == false
+            ? _t.ModeGammaUnavailable
+            : _t.ModeGamma;
     }
 
     private void UpdateDynamicExample()
@@ -464,7 +477,10 @@ public partial class Form1 : Form
         SaveSettingsFromUi();
 
         _percentToRemove = trackBrightness.Value;
-        _brightness!.CaptureStartLevel();
+        _brightnessControlUnavailable = false;
+
+        // Brightness is best-effort: sleep timer always starts even if dimming fails.
+        var brightnessReady = _brightness!.CaptureStartLevel();
         _startLevel = _brightness.StartBrightness;
         _targetLevel = (byte)Math.Max(0, _startLevel - _percentToRemove);
         _endTime = DateTime.Now + _totalDuration;
@@ -474,9 +490,13 @@ public partial class Form1 : Form
 
         SetControlsEnabled(running: true);
         progressBar.Value = 0;
-        UpdateBrightnessForProgress(0);
+
+        if (!brightnessReady || !UpdateBrightnessForProgress(0))
+            NotifyBrightnessControlFailureOnce();
+
         UpdateStatusUi();
         UpdateTrayUi();
+        UpdateModeLabel();
 
         timerTick.Start();
     }
@@ -652,7 +672,10 @@ public partial class Form1 : Form
         var progress = Math.Clamp(elapsed.TotalSeconds / _totalDuration.TotalSeconds, 0.0, 1.0);
 
         progressBar.Value = (int)(progress * 100);
-        UpdateBrightnessForProgress(progress);
+
+        if (!_brightnessControlUnavailable && !UpdateBrightnessForProgress(progress))
+            NotifyBrightnessControlFailureOnce();
+
         UpdateStatusUi();
         UpdateTrayUi();
     }
@@ -772,7 +795,10 @@ public partial class Form1 : Form
 
     private void EnterSleep()
     {
-        UpdateBrightnessForProgress(1.0);
+        // Best-effort final dim; sleep proceeds even if brightness is unavailable.
+        if (!_brightnessControlUnavailable)
+            _ = UpdateBrightnessForProgress(1.0);
+
         progressBar.Value = 100;
         lblRemaining.Text = _t.TimeElapsedSleeping;
         lblStatus.Text = _t.SleepingPc;
@@ -842,11 +868,35 @@ public partial class Form1 : Form
         }
     }
 
-    private void UpdateBrightnessForProgress(double progress)
+    /// <summary>
+    /// Applies brightness for the current progress (0–1).
+    /// Uses a float level so gamma can change more smoothly than whole percents.
+    /// </summary>
+    /// <returns>false if the brightness backend rejected the change.</returns>
+    private bool UpdateBrightnessForProgress(double progress)
     {
-        var target = _startLevel - (_percentToRemove * progress);
-        var level = (byte)Math.Clamp((int)Math.Round(target), 0, 100);
-        _brightness?.SetBrightnessPercent(level);
+        if (_brightness is null)
+            return false;
+
+        var target = (float)(_startLevel - (_percentToRemove * progress));
+        return _brightness.SetBrightnessPercent(target);
+    }
+
+    /// <summary>
+    /// Warn once that dimming failed; does not cancel the sleep timer.
+    /// </summary>
+    private void NotifyBrightnessControlFailureOnce()
+    {
+        if (_brightnessControlUnavailable)
+            return;
+
+        _brightnessControlUnavailable = true;
+        UpdateModeLabel();
+        MessageBox.Show(
+            _t.BrightnessControlFailedMessage,
+            _t.BrightnessControlFailedTitle,
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Warning);
     }
 
     private void UpdateStatusUi()
@@ -854,8 +904,16 @@ public partial class Form1 : Form
         var remaining = _endTime - DateTime.Now;
         if (remaining < TimeSpan.Zero) remaining = TimeSpan.Zero;
 
-        var level = _brightness?.CurrentBrightness ?? 0;
-        lblStatus.Text = string.Format(_t.RunningStatus, level, _startLevel, _targetLevel);
+        if (_brightnessControlUnavailable)
+        {
+            lblStatus.Text = _t.BrightnessControlFailedStatus;
+        }
+        else
+        {
+            var level = _brightness?.CurrentBrightness ?? 0;
+            lblStatus.Text = string.Format(_t.RunningStatus, level, _startLevel, _targetLevel);
+        }
+
         lblRemaining.Text = string.Format(
             _t.Remaining,
             $"{remaining.Hours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}");
@@ -870,10 +928,12 @@ public partial class Form1 : Form
         CloseWarningDialog();
         SetControlsEnabled(running: false);
 
-        if (restoreBrightness)
+        if (restoreBrightness && !_brightnessControlUnavailable)
         {
             _brightness?.RestoreStartLevel();
         }
+
+        _brightnessControlUnavailable = false;
     }
 
     private void RestoreBrightnessAfterSleepSession(bool failedSleep = false)
