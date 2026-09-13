@@ -1,3 +1,5 @@
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using LeDormeur.Localization;
 using LeDormeur.Services;
 using Microsoft.Win32;
@@ -29,6 +31,7 @@ public partial class Form1 : Form
     private bool _reallyExit;
     private bool _trayBalloonShown;
     private ToolStripMenuItem? _trayAutoModeItem;
+    private ToolStripMenuItem? _trayOptionsItem;
     private StillThereForm? _stillThereForm;
     private DateOnly? _autoModeFiredDate;
     private bool _autoModePromptActive;
@@ -50,6 +53,7 @@ public partial class Form1 : Form
     public Form1()
     {
         InitializeComponent();
+        StyleOptionsButton();
         try
         {
             var path = Environment.ProcessPath;
@@ -108,6 +112,9 @@ public partial class Form1 : Form
         _trayAutoModeItem = new ToolStripMenuItem();
         _trayAutoModeItem.Click += (_, _) => OpenAutoModeWindow();
 
+        _trayOptionsItem = new ToolStripMenuItem();
+        _trayOptionsItem.Click += (_, _) => OpenOptionsWindow();
+
         _trayExitItem = new ToolStripMenuItem();
         _trayExitItem.Click += (_, _) => ExitFromTray();
 
@@ -115,6 +122,7 @@ public partial class Form1 : Form
         _trayMenu.Items.Add(_trayOpenItem);
         _trayMenu.Items.Add(_trayCancelItem);
         _trayMenu.Items.Add(_trayAutoModeItem);
+        _trayMenu.Items.Add(_trayOptionsItem);
         _trayMenu.Items.Add(new ToolStripSeparator());
         _trayMenu.Items.Add(_trayExitItem);
 
@@ -240,6 +248,9 @@ public partial class Form1 : Form
         if (_trayAutoModeItem is not null)
             _trayAutoModeItem.Text = _t.TrayAutoMode;
 
+        if (_trayOptionsItem is not null)
+            _trayOptionsItem.Text = _t.TrayOptions;
+
         // NotifyIcon.Text max length is 63 characters
         string tip;
         if (_running)
@@ -317,14 +328,67 @@ public partial class Form1 : Form
     {
         const int rightMargin = 16;
         const int gap = 10;
+        const int iconGap = 6;
 
-        cmbLanguage.Left = ClientSize.Width - rightMargin - cmbLanguage.Width;
+        btnOptions.Left = ClientSize.Width - rightMargin - btnOptions.Width;
+        btnOptions.Top = cmbLanguage.Top + (cmbLanguage.Height - btnOptions.Height) / 2;
+
+        cmbLanguage.Left = btnOptions.Left - iconGap - cmbLanguage.Width;
         var labelWidth = TextRenderer.MeasureText(
             lblLanguage.Text,
             lblLanguage.Font,
             Size.Empty,
             TextFormatFlags.NoPadding).Width;
         lblLanguage.Left = cmbLanguage.Left - gap - labelWidth;
+    }
+
+    private void StyleOptionsButton()
+    {
+        btnOptions.Text = string.Empty;
+        btnOptions.Image?.Dispose();
+        btnOptions.Image = CreateSettingsGearIcon(16, Color.FromArgb(70, 70, 70));
+    }
+
+    private static Bitmap CreateSettingsGearIcon(int size, Color color)
+    {
+        const int q = 4, teeth = 8;
+        int s = size * q;
+        float c = s / 2f;
+        var tmp = new Bitmap(s, s, PixelFormat.Format32bppArgb);
+        var pts = new List<PointF>();
+        float[] r = { .31f, .35f, .44f, .44f, .35f, .31f };
+        float[] a = { -.5f, -.32f, -.18f, .18f, .32f, .5f };
+
+        for (int i = 0; i < teeth; i++)
+            for (int j = 0; j < 6; j++)
+            {
+                float x = -MathF.PI / 2 + i * MathF.PI / 4 + a[j] * MathF.PI / 4;
+                pts.Add(new(c + MathF.Cos(x) * s * r[j], c + MathF.Sin(x) * s * r[j]));
+            }
+
+        using (var g = Graphics.FromImage(tmp))
+        using (var p = new GraphicsPath(FillMode.Alternate))
+        using (var b = new SolidBrush(color))
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.Clear(Color.Transparent);
+            p.AddPolygon(pts.ToArray());
+
+            float h = s * .12f;
+            p.AddEllipse(c - h, c - h, h * 2, h * 2);
+            g.FillPath(b, p);
+        }
+
+        var bmp = new Bitmap(size, size, PixelFormat.Format32bppArgb);
+        using (var g = Graphics.FromImage(bmp))
+        {
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            g.DrawImage(tmp, 0, 0, size, size);
+        }
+
+        tmp.Dispose();
+        return bmp;
     }
 
     private void ApplySettingsToControls()
@@ -354,6 +418,8 @@ public partial class Form1 : Form
         btnStart.Text = _t.Start;
         btnCancel.Text = _t.Cancel;
         btnAutoMode.Text = _t.AutoModeButton;
+        btnOptions.AccessibleName = _t.OptionsWindowTitle;
+        tipOptions.SetToolTip(btnOptions, _t.OptionsButton);
 
         if (!_running && !_autoModePromptActive)
         {
@@ -511,6 +577,11 @@ public partial class Form1 : Form
         OpenAutoModeWindow();
     }
 
+    private void btnOptions_Click(object? sender, EventArgs e)
+    {
+        OpenOptionsWindow();
+    }
+
     private void OpenAutoModeWindow()
     {
         using var form = new AutoModeForm(_settings, _t);
@@ -518,6 +589,12 @@ public partial class Form1 : Form
         // Settings already saved on OK inside the form
         UpdateAutoModeStatusLabel();
         UpdateTrayUi();
+    }
+
+    private void OpenOptionsWindow()
+    {
+        using var form = new OptionsForm(_t);
+        form.ShowDialog(this);
     }
 
     private void CancelSession()
@@ -1006,6 +1083,9 @@ public partial class Form1 : Form
         SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
         SaveSettingsFromUi();
         _brightness?.Dispose();
+        var optionsIcon = btnOptions.Image;
+        btnOptions.Image = null;
+        optionsIcon?.Dispose();
     }
 
     private void DisposeTrayIcon()

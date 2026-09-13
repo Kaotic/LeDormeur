@@ -33,6 +33,8 @@ partial class Form1
         btnStart = new Button();
         btnCancel = new Button();
         btnAutoMode = new Button();
+        btnOptions = new Button();
+        tipOptions = new ToolTip(components);
         progressBar = new ProgressBar();
         lblStatus = new Label();
         lblRemaining = new Label();
@@ -76,6 +78,25 @@ partial class Form1
         cmbLanguage.Size = new Size(120, 23);
         cmbLanguage.TabIndex = 17;
         cmbLanguage.SelectedIndexChanged += cmbLanguage_SelectedIndexChanged;
+        //
+        // btnOptions
+        //
+        btnOptions.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnOptions.BackColor = Color.White;
+        btnOptions.Cursor = Cursors.Hand;
+        btnOptions.FlatAppearance.BorderSize = 0;
+        btnOptions.FlatAppearance.MouseDownBackColor = Color.FromArgb(210, 210, 210);
+        btnOptions.FlatAppearance.MouseOverBackColor = Color.FromArgb(232, 232, 232);
+        btnOptions.FlatStyle = FlatStyle.Flat;
+        btnOptions.Font = new Font("Segoe UI", 9F);
+        btnOptions.Location = new Point(438, 17);
+        btnOptions.Name = "btnOptions";
+        btnOptions.Padding = new Padding(0);
+        btnOptions.Size = new Size(26, 26);
+        btnOptions.TabIndex = 20;
+        btnOptions.TextAlign = ContentAlignment.MiddleCenter;
+        btnOptions.UseVisualStyleBackColor = false;
+        btnOptions.Click += btnOptions_Click;
         //
         // lblDuration
         //
@@ -277,6 +298,7 @@ partial class Form1
         BackColor = Color.White;
         ClientSize = new Size(480, 468);
         Controls.Add(lblVersion);
+        Controls.Add(btnOptions);
         Controls.Add(cmbLanguage);
         Controls.Add(lblLanguage);
         Controls.Add(lblMode);
@@ -329,6 +351,8 @@ partial class Form1
     private Button btnStart;
     private Button btnCancel;
     private Button btnAutoMode;
+    private Button btnOptions;
+    private ToolTip tipOptions;
     private ProgressBar progressBar;
     private Label lblStatus;
     private Label lblRemaining;
